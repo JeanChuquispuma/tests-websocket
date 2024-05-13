@@ -9,6 +9,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Device {
-    private String uniqueId;
+public class ChatMessage {
+    private String message;
+    private String user;
 }

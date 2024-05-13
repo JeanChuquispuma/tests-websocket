@@ -27,9 +27,10 @@ public class JwtService implements IJwtService {
 
     public String generateToken(Device device) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("deviceId", device.getSerial());
+        claims.put("uniqueId", device.getUniqueId());
+        /*claims.put("deviceId", device.getSerial());
         claims.put("deviceName", device.getDeviceModel());
-        claims.put("deviceType", device.getDeviceManufacturer());
+        claims.put("deviceType", device.getDeviceManufacturer());*/
         return createToken(claims, device);
     }
     private String createToken(Map<String, Object> claims, Device device) {

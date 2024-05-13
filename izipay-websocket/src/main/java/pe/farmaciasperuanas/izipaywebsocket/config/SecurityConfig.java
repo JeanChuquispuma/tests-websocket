@@ -8,8 +8,10 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.security.web.server.SecurityWebFilterChain;
 import pe.farmaciasperuanas.izipaywebsocket.components.JwtAuthFilter;
 import pe.farmaciasperuanas.izipaywebsocket.services.impl.JwtService;
 
@@ -23,7 +25,9 @@ public class SecurityConfig {
     private static final String[] AUTH_WHITELIST = {
             "/hola",
             "/generateToken",
-            "/processToken"
+            "/processToken",
+            "/gs-guide-websocket/**",
+            "/gs-guide-websocket/*"
     };
 
     @Bean
@@ -37,6 +41,7 @@ public class SecurityConfig {
                 .httpBasic(Customizer.withDefaults())
                 //.formLogin(Customizer.withDefaults())
                 .addFilterBefore(jwtAuthFilter(), BasicAuthenticationFilter.class);
+        http.cors(cors -> cors.disable());
         return http.build();
     }
 
