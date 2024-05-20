@@ -46,7 +46,7 @@ public class TokenController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Solicitud incorrecta");
         }
     }
-
+    
     @GetMapping("/mundo")
     public ResponseEntity<String> mundo() {
         return ResponseEntity.ok("MundoJAJA");

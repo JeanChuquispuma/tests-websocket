@@ -1,52 +1,71 @@
 package pe.farmaciasperuanas.izipaywebsocket.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpMethod;import org.springframework.http.ResponseEntity;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
-import org.springframework.security.web.server.SecurityWebFilterChain;
-import pe.farmaciasperuanas.izipaywebsocket.components.JwtAuthFilter;
-import pe.farmaciasperuanas.izipaywebsocket.services.impl.JwtService;
 
-@Configuration
+import pe.farmaciasperuanas.izipaywebsocket.client.AbaxBackendClient;
+import pe.farmaciasperuanas.izipaywebsocket.components.JwtAuthFilter;
+import pe.farmaciasperuanas.izipaywebsocket.dto.JwtValidateAbaxDto;
+import pe.farmaciasperuanas.izipaywebsocket.services.impl.AbaxBackendJwtService;
+
 @EnableWebSecurity
 @EnableMethodSecurity
+@Configuration
 public class SecurityConfig {
-    @Autowired
-    private JwtService jwtService;
 
     private static final String[] AUTH_WHITELIST = {
             "/hola",
             "/generateToken",
             "/processToken",
             "/gs-guide-websocket/**",
-            "/gs-guide-websocket/*"
+            "/gs-guide-websocket/*",
+            "/encrypt",
+            "/decrypt"
     };
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf().disable()
-                .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(AUTH_WHITELIST).permitAll()
-                        .requestMatchers(HttpMethod.POST, "/generateToken").permitAll()
-                        .anyRequest().authenticated()
-                )
+    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http.csrf(csrf -> csrf.disable())
+        		.authorizeHttpRequests(authorize -> authorize
+	                .requestMatchers(AUTH_WHITELIST).permitAll() // Permitir acceso sin autenticación a las rutas en AUTH_WHITELIST
+	                .requestMatchers(HttpMethod.POST, "/generateToken").permitAll()
+	                .requestMatchers(HttpMethod.POST, "/encrypt").permitAll()
+	                .requestMatchers(HttpMethod.POST, "/decrypt").permitAll()
+	                .anyRequest().authenticated() // Requerir autenticación para cualquier otra solicitud
+	            )
                 .httpBasic(Customizer.withDefaults())
                 //.formLogin(Customizer.withDefaults())
-                .addFilterBefore(jwtAuthFilter(), BasicAuthenticationFilter.class);
+               .addFilterBefore(jwtAuthFilter(), BasicAuthenticationFilter.class);
         http.cors(cors -> cors.disable());
         return http.build();
     }
+    
+    @Bean
+    UserDetailsService userDetailsService() {
+        InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
+        manager.createUser(User.withUsername("user")
+                .password("{noop}password") // {noop} indica que no se realiza ningún cifrado en la contraseña
+                .roles("USER")
+                .build());
+        manager.createUser(User.withUsername("admin")
+                .password("{noop}admin")
+                .roles("ADMIN")
+                .build());
+        return manager;
+    }
 
     @Bean
-    public JwtAuthFilter jwtAuthFilter(){
+    JwtAuthFilter jwtAuthFilter(){
         return new JwtAuthFilter();
     }
 }

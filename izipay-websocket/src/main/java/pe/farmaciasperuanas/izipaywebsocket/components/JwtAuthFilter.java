@@ -4,6 +4,8 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+
+import pe.farmaciasperuanas.izipaywebsocket.services.IAbaxBackendJwtService;
+import pe.farmaciasperuanas.izipaywebsocket.services.impl.AbaxBackendJwtService;
 import pe.farmaciasperuanas.izipaywebsocket.services.impl.JwtService;
 
 import java.io.IOException;
@@ -24,29 +29,43 @@ import java.util.stream.Collectors;
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
     private static final Logger log = LoggerFactory.getLogger(JwtAuthFilter.class);
-
+    
     @Autowired
-    private JwtService jwtService;
+	private AbaxBackendJwtService abaxBackendJwtService;
 
-    @Override
+    public JwtAuthFilter() {
+		// TODO Auto-generated constructor stub
+	}
+
+	@Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain)
             throws ServletException, IOException {
-        log.info("Custom filter called...");
-
-        String authHeader = request.getHeader("Authorization");
-        String token = null;
-        String username = null;
-
-        if(authHeader != null && authHeader.startsWith("Bearer ")){
-            token = authHeader.substring(7);
-
-            Authentication authentication = getAuthentication(token);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+    	String authHeader = request.getHeader("Authorization");
+        
+        if(request.getRequestURI().startsWith("/encrypt") || request.getRequestURI().startsWith("/decrypt")) {
+        	
+        	
+        	if(authHeader != null && authHeader.startsWith("Bearer ")) {
+        		String token = authHeader.substring(7);
+        		if(abaxBackendJwtService.validateAuthHeaderJwt(token)){
+        			Authentication authentication = getAuthentication(token);
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                    filterChain.doFilter(request, response);
+        		}else {
+        			response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Missing or invalid Authorization header");
+        			 return;
+        		}
+            } else if(authHeader != null && authHeader.startsWith("Basic ")){
+                filterChain.doFilter(request, response);
+            } else {
+            	response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Missing or invalid Authorization header");
+                return;
+            }
+        }else {
+        	filterChain.doFilter(request, response);
         }
-
-        filterChain.doFilter(request, response);
     }
 
     private Authentication getAuthentication(String token) {
