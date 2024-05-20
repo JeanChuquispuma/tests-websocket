@@ -2,6 +2,7 @@ package pe.farmaciasperuanas.izipaywebsocket.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -18,7 +19,7 @@ import pe.farmaciasperuanas.izipaywebsocket.components.JwtAuthFilter;
 @Configuration
 public class SecurityConfig {
 
-    private static final String[] AUTH_WHITELIST = {
+    public static final String[] AUTH_WHITELIST = {
             "/generateToken",
             "/gs-guide-websocket/**",
             "/gs-guide-websocket/*"
@@ -29,6 +30,7 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
         		.authorizeHttpRequests(authorize -> authorize
 	                .requestMatchers(AUTH_WHITELIST).permitAll()
+	                .requestMatchers(HttpMethod.POST, "/generateToken").permitAll()
 	                .anyRequest().authenticated()
 	            )
                 .httpBasic(Customizer.withDefaults())

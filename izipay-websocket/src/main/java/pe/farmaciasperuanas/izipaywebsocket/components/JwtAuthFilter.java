@@ -14,6 +14,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+
+import pe.farmaciasperuanas.izipaywebsocket.config.SecurityConfig;
 import pe.farmaciasperuanas.izipaywebsocket.services.impl.AbaxBackendJwtService;
 
 import java.io.IOException;
@@ -37,22 +39,36 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
     	String authHeader = request.getHeader("Authorization");
         
-    	if(authHeader != null && authHeader.startsWith("Bearer ")) {
-    		String token = authHeader.substring(7);
-    		if(abaxBackendJwtService.validateAuthHeaderJwt(token)){
-    			Authentication authentication = getAuthentication(token);
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+    	boolean matches = false;
+    	for (String path : SecurityConfig.AUTH_WHITELIST) {
+    	    if (request.getRequestURI().startsWith(path.replace("/**", "").replace("/*", ""))) {
+    	        matches = true;
+    	        break;
+    	    }
+    	}
+    	
+    	if(!matches) {
+    		if(authHeader != null && authHeader.startsWith("Bearer ")) {
+        		String token = authHeader.substring(7);
+        		if(abaxBackendJwtService.validateAuthHeaderJwt(token)){
+        			Authentication authentication = getAuthentication(token);
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                    filterChain.doFilter(request, response);
+        		}else {
+        			response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Missing or invalid Authorization header");
+        			 return;
+        		}
+            } else if(authHeader != null && authHeader.startsWith("Basic ")){
                 filterChain.doFilter(request, response);
-    		}else {
-    			response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Missing or invalid Authorization header");
-    			 return;
-    		}
-        } else if(authHeader != null && authHeader.startsWith("Basic ")){
-            filterChain.doFilter(request, response);
-        } else {
-        	response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Missing or invalid Authorization header");
-            return;
-        }
+            } else {
+            	response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Missing or invalid Authorization header");
+                return;
+            }
+    	}else {
+    		filterChain.doFilter(request, response);
+    	}
+    	
+    	
     }
 
     private Authentication getAuthentication(String token) {
