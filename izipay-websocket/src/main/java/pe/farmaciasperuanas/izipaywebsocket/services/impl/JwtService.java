@@ -24,15 +24,22 @@ public class JwtService implements IJwtService {
 
     @Value("${security.jwt.expiration-time}")
     private long jwtExpiration;
+    
+    private static final String UNIQUE_ID = "uniqueId";
 
     public String generateToken(Device device) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("uniqueId", device.getUniqueId());
+        claims.put(UNIQUE_ID, device.getUniqueId());
         /*claims.put("deviceId", device.getSerial());
         claims.put("deviceName", device.getDeviceModel());
         claims.put("deviceType", device.getDeviceManufacturer());*/
         return createToken(claims, device);
     }
+    
+    public String extractUniqueId(String token) {
+	  return extractClaim(token, claims -> (String) claims.get(UNIQUE_ID));
+	}
+    
     private String createToken(Map<String, Object> claims, Device device) {
         return Jwts.builder()
                 .setClaims(claims)
@@ -55,6 +62,9 @@ public class JwtService implements IJwtService {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
+    
+    
+    
     private Claims extractAllClaims(String token) {
         return Jwts
                 .parserBuilder()

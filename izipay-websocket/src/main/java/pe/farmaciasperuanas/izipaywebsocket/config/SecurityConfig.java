@@ -2,7 +2,6 @@ package pe.farmaciasperuanas.izipaywebsocket.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;import org.springframework.http.ResponseEntity;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -12,11 +11,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
-
-import pe.farmaciasperuanas.izipaywebsocket.client.AbaxBackendClient;
 import pe.farmaciasperuanas.izipaywebsocket.components.JwtAuthFilter;
-import pe.farmaciasperuanas.izipaywebsocket.dto.JwtValidateAbaxDto;
-import pe.farmaciasperuanas.izipaywebsocket.services.impl.AbaxBackendJwtService;
 
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -24,24 +19,17 @@ import pe.farmaciasperuanas.izipaywebsocket.services.impl.AbaxBackendJwtService;
 public class SecurityConfig {
 
     private static final String[] AUTH_WHITELIST = {
-            "/hola",
             "/generateToken",
-            "/processToken",
             "/gs-guide-websocket/**",
-            "/gs-guide-websocket/*",
-            "/encrypt",
-            "/decrypt"
+            "/gs-guide-websocket/*"
     };
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
         		.authorizeHttpRequests(authorize -> authorize
-	                .requestMatchers(AUTH_WHITELIST).permitAll() // Permitir acceso sin autenticación a las rutas en AUTH_WHITELIST
-	                .requestMatchers(HttpMethod.POST, "/generateToken").permitAll()
-	                .requestMatchers(HttpMethod.POST, "/encrypt").permitAll()
-	                .requestMatchers(HttpMethod.POST, "/decrypt").permitAll()
-	                .anyRequest().authenticated() // Requerir autenticación para cualquier otra solicitud
+	                .requestMatchers(AUTH_WHITELIST).permitAll()
+	                .anyRequest().authenticated()
 	            )
                 .httpBasic(Customizer.withDefaults())
                 //.formLogin(Customizer.withDefaults())
