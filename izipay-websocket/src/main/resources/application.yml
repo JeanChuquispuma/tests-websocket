@@ -13,3 +13,8 @@ security:
 abax-backend:
   name: abax-backend-client
   host: https://dev-abax-posu-backend.solucionestifps.com
+  
+cors:
+  allowed-origins:
+    - http://localhost:4200
+    - https://dev-abax-posu.solucionestifps.com
