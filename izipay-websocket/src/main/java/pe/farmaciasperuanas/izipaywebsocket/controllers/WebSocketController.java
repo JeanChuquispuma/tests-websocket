@@ -22,7 +22,7 @@ public class WebSocketController {
     @MessageMapping("/order/{roomId}")
     @SendTo("/topic/order/{roomId}")
     public OrderMessageDto receiveOrder(@DestinationVariable String roomId, OrderMessageDto order) {
-        System.out.println("Received order: " + order.getMessage());
+        System.out.println("Received order: " + order.getCodFPago());
         return order;
     }
 
@@ -30,7 +30,7 @@ public class WebSocketController {
     @MessageMapping("/response/{roomId}")
     @SendTo("/topic/response/{roomId}")
     public ResponseMessageDto sendResponse(@DestinationVariable String roomId, ResponseMessageDto response) {
-        System.out.println("Sending response: " + response.getMessage());
+        System.out.println("Sending response: " + response.getCode());
         return response;
     }
 }
