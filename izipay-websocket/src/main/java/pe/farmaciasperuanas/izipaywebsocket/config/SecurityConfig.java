@@ -5,7 +5,7 @@ import java.util.Arrays;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-/*import org.springframework.security.config.Customizer;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -13,7 +13,7 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;*/
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -21,12 +21,12 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import pe.farmaciasperuanas.izipaywebsocket.components.JwtAuthFilter;
 
-/*@EnableWebSecurity
+@EnableWebSecurity
 @EnableMethodSecurity
-@Configuration*/
+@Configuration
 public class SecurityConfig {
 	
-	/*
+	
 	@Autowired
 	CorsProperties corsProperties;
 
@@ -44,9 +44,9 @@ public class SecurityConfig {
         		.authorizeHttpRequests(authorize -> authorize
 	                .requestMatchers(AUTH_WHITELIST).permitAll()
 	                //.requestMatchers(HttpMethod.POST, "/generateToken").permitAll()
-	                //.anyRequest().authenticated()
+	                .anyRequest().authenticated()
 	            )
-                //.httpBasic(Customizer.withDefaults())
+                .httpBasic(Customizer.withDefaults())
                 //.formLogin(Customizer.withDefaults())
                .addFilterBefore(jwtAuthFilter(), BasicAuthenticationFilter.class);
         return http.build();
@@ -82,5 +82,5 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration); // Aplicar configuración a todos los endpoints
         return source;
-    }*/
+    }
 }
